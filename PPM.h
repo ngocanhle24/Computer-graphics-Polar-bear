@@ -14,21 +14,20 @@ private:
 	unsigned int height, width, maxColor;
 	vector<Pixel> pixels;
 
-
 public:
 	PPM();
-	PPM(const PPM&); //? copy constructor
-	PPM(PPM&&); //? move constructor
-	PPM(ifstream&);
+	PPM(const PPM &); //? copy constructor
+	PPM(PPM &&);	  //? move constructor
+	PPM(ifstream &);
 	~PPM();
 
 	//? data member getters
-	string getComment();
-	string getMagic();
-	unsigned int getMaxColor();
-	unsigned int getHeight();
-	unsigned int getWidth();
-	unsigned int getSize();
+	string getComment() const;
+	string getMagic() const;
+	unsigned int getMaxColor() const;
+	unsigned int getHeight() const;
+	unsigned int getWidth() const;
+	unsigned int getSize() const;
 
 	//? data member setters
 	void setComment(string);
@@ -37,12 +36,11 @@ public:
 	void setHeight(unsigned int);
 	void setWidth(unsigned int);
 
-	const Pixel& operator[](unsigned int) const; //? getter offset
-	Pixel& operator[](unsigned int); //? setter offset
-	const PPM& operator=(const PPM&); //? copy assignment
-	const PPM& operator=(PPM&&); //? move assignment
+	const Pixel &operator[](unsigned int) const; //? getter offset
+	Pixel &operator[](unsigned int);			 //? setter offset
+	const PPM &operator=(const PPM &);			 //? copy assignment
+	const PPM &operator=(PPM &&);				 //? move assignment
 
 	void resize(unsigned int);
-	void saveImageToFile(string);
-
+	void saveImageToFile(string) const;
 };

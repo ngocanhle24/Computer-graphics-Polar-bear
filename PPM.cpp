@@ -3,89 +3,90 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
 PPM::PPM()
 	: magic(""), comment(""), height(0), width(0), maxColor(0), pixels({})
 {
-	cout << "Default PPM constructor called." << endl;
+	// cout << "Default PPM constructor called." << endl;
 }
 
-PPM::PPM(const PPM& img)
+PPM::PPM(const PPM &img)
 	: magic(img.magic), comment(img.comment), height(img.height), width(img.width), maxColor(img.maxColor), pixels(img.pixels)
-{
-	cout << "PPM copy constructor called." << endl;
-
-	// copy pixels to vector
-	for (int i = 0; i < img.pixels.size(); i++)
-		pixels.emplace_back(Pixel(img.pixels[i])); // emplace pixel
+{ // vector is already initialized in member initializer list, no need for a for loop?
+  // cout << "PPM copy constructor called." << endl;
 }
 
-PPM::PPM(PPM&& img)
+PPM::PPM(PPM &&img)
 	: magic(img.magic), comment(img.comment), height(img.height), width(img.width), maxColor(img.maxColor), pixels(move(img.pixels))
 {
-	cout << "PPM move constructor called." << endl;
+	// cout << "PPM move constructor called." << endl;
 }
 
-PPM::PPM(ifstream& infile)
+PPM::PPM(ifstream &infile)
 {
-	cout << "1-arg PPM constructor called." << endl;
+	// cout << "1-arg PPM constructor called." << endl;
 
 	// get magix number and comment
 	getline(infile, magic);
-	getline(infile, comment);
+	while (infile.peek() == '#')
+	{ // read comment on several lines
+		string line;
+		getline(infile, line);
+		comment += line;
+	}
 
 	// get width, height, color depth
 	infile >> width >> height >> maxColor;
 
 	// emplace pixels to vector
-	unsigned int r, g, b, numPixels = width * height;
-	for (int i = 0; i < numPixels; i++)
+	unsigned int r, g, b;
+	while (infile >> r >> g >> b)
 	{
-		infile >> r >> g >> b; // get rgb values
-		pixels.emplace_back(Pixel(r, g, b)); // emplace anon pixel
+		pixels.emplace_back(r, g, b); // emplace Pixel(r,b,g)
 	}
 }
 
 PPM::~PPM()
 {
-	cout << "PPM destructor called." << endl;
+	// cout << "PPM destructor called." << endl;
 }
 
-string PPM::getComment()
+string PPM::getComment() const
 {
 	return comment;
 }
 
-string PPM::getMagic()
+string PPM::getMagic() const
 {
 	return magic;
 }
 
-unsigned int PPM::getMaxColor()
+unsigned int PPM::getMaxColor() const
 {
 	return maxColor;
 }
 
-unsigned int PPM::getHeight()
+unsigned int PPM::getHeight() const
 {
 	return height;
 }
 
-unsigned int PPM::getWidth()
+unsigned int PPM::getWidth() const
 {
 	return width;
 }
 
-unsigned int PPM::getSize()
+unsigned int PPM::getSize() const
 {
 	return height * width;
 }
 
 void PPM::setComment(string str)
 {
-	comment = str;
+	comment = '#' + str;
 }
 
 void PPM::setMagic(string str)
@@ -108,56 +109,87 @@ void PPM::setWidth(unsigned int num)
 	width = num;
 }
 
-const Pixel& PPM::operator[](unsigned int num) const
+const Pixel &PPM::operator[](unsigned int num) const
 {
+	if (num < 0 || num >= getSize())
+		throw runtime_error("Pixel index out of bounds\n");
 	return pixels[num];
 }
 
-Pixel& PPM::operator[](unsigned int num)
+Pixel &PPM::operator[](unsigned int num)
 {
+	if (num < 0 || num >= getSize())
+		throw runtime_error("Pixel index out of bounds\n");
 	return pixels[num];
 }
 
-const PPM& PPM::operator=(const PPM& img)
+const PPM &PPM::operator=(const PPM &img)
 {
-	cout << "PPM copy assignment called." << endl;
+	// cout << "PPM copy assignment called." << endl;
 
 	// check for self-assignment
-	if (this == &img)
-		return *this;
+	if (this != &img)
+	{
+		// copy data members
+		magic = img.magic;
+		comment = img.comment;
+		height = img.height;
+		width = img.width;
+		maxColor = img.maxColor;
 
-	// copy data members
-	magic = img.magic;
-	comment = img.comment;
-	height = img.height;
-	width = img.width;
-	maxColor = img.maxColor;
-
-	// copy pixels to vector
-	pixels.clear(); // clear vector
-	for (int i = 0; i < img.pixels.size(); i++)
-		pixels.emplace_back(Pixel(img.pixels[i])); // emplace pixel
-
+		// copy pixels to vector
+		pixels = img.pixels; // vector "=" operator automatically reallocate for new size and assign all elements
+	}
 	return *this;
 }
 
-const PPM& PPM::operator=(PPM&& img)
+const PPM &PPM::operator=(PPM &&img)
 {
-	cout << "PPM move assignment called." << endl;
+	// cout << "PPM move assignment called." << endl;
 
 	// check for self-assignment
-	if (this == &img)
-		return *this;
+	if (this != &img)
+	{
+		// copy data members
+		magic = img.magic;
+		comment = img.comment;
+		height = img.height;
+		width = img.width;
+		maxColor = img.maxColor;
 
-	// copy data members
-	magic = img.magic;
-	comment = img.comment;
-	height = img.height;
-	width = img.width;
-	maxColor = img.maxColor;
-
-	// move vector
-	pixels = move(img.pixels);
-
+		// copy pixels to vector
+		pixels = move(img.pixels);
+	}
 	return *this;
+}
+void PPM::saveImageToFile(string file) const
+{
+	ofstream outFile(file);
+	try
+	{
+		if (!outFile.fail())
+		{
+			outFile << magic << "\n"
+					<< comment << "\n"
+					<< width << " " << height << "\n"
+					<< maxColor << "\n";
+			for (auto pixel : pixels)
+			{
+				outFile << pixel["red"] << " " << pixel["green"] << " " << pixel["blue"] << " ";
+			}
+			outFile.close();
+		}
+		else
+			throw "File can't be opened\n";
+	}
+	catch (const char *s)
+	{
+		cout << s;
+		throw;
+	}
+}
+
+void PPM::resize(unsigned int n)
+{
+	pixels.resize(n); // No idea what he means by "Resize"
 }
