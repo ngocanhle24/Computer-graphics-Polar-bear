@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -191,5 +192,21 @@ void PPM::saveImageToFile(string file) const
 
 void PPM::resize(unsigned int n)
 {
-	pixels.resize(n); // No idea what he means by "Resize"
+	/* store width & height */
+	int w = getWidth();
+	int h = getHeight();
+
+	/* update width & height */
+	setWidth(ceil(w/n));
+	setHeight(ceil(h/n));
+
+	/* write every nth pixel to a new vector of pixels */
+	vector<Pixel> temp;
+	for (int row = 0; row < h; row++) // loop thru rows
+		for (int col= 0; col < w; col++) // loop thru columns
+			if (row % n != 0 && col % n != 0)
+				temp.emplace_back(pixels[row*w+col]); // write pixel to temp
+
+	pixels.clear(); // clear pixels
+	pixels = temp; // repopulate pixels
 }

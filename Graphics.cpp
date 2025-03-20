@@ -1,6 +1,5 @@
 #include "Graphics.h"
 
-#include "graphics.h"
 #include <iostream>
 #include <vector>
 
@@ -16,9 +15,9 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 		[i+c-1]          [i+c]          [i+c+1]               [][][]
 	*/
 	vector<int> offset = {
-		-c - 1, -c, -c + 1,
+		-c-1, -c, -c+1,
 		-1, 0, 1,
-		c - 1, c, c + 1};
+		 c-1, c, c+1};
 
 	double v;
 	if (!strcmp(filterType, "blur"))
@@ -91,15 +90,20 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 	cout << filterType << " succeeds\n";
 	return image;
 }
+
 // const PPM& Graphics::makeGrayScale(PPM& image) {
 //
 // }
 // const PPM& Graphics::rotateImage(PPM& image, double angle) {
 //
 // }
-// const PPM& Graphics::scaleImage(PPM& image, double k) {
-//
-// }
+
+const PPM& Graphics::scaleImage(PPM& image, double factor) {
+	image.resize(factor);
+	cout << "resize completed" << endl;
+	return image;
+}
+
 // const PPM& Graphics::translateImage(PPM& image, int dx, int dy) {
 //
 // }
