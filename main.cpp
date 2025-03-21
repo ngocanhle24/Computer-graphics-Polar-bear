@@ -50,8 +50,6 @@ int main()
 		image6->saveImageToFile(filename + "_scaleDown.ppm");
 		g.scaleImage(*image7, 2); // expand image
 		image7->saveImageToFile(filename + "_scaleUp.ppm");
-		g.scaleImage(*image8, -0.5); // shrink & flip image
-		image8->saveImageToFile(filename + "_scaleUp.ppm");
 		// rotate image CCW
 		// rotate image CW
 		// tranlate image right and down
