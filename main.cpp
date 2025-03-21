@@ -32,8 +32,6 @@ int main()
 		PPM* image6 = new PPM(*image1);
 		PPM* image7 = new PPM(*image1);
 		PPM* image8 = new PPM(*image1);
-		PPM* image9 = new PPM(*image1);
-		PPM* image10 = new PPM(*image1);
 
 		Graphics g;
 
@@ -48,10 +46,12 @@ int main()
 		g.applyFilter(*image5, "lapacian"); // detect edges (alternate)
 		image5->saveImageToFile(filename + "_lapacian.ppm");
 
-		g.scaleImage(*image6, 0.5); // shrink image
+		g.scaleImage(*image6, 0.2); // shrink image
 		image6->saveImageToFile(filename + "_scaleDown.ppm");
 		g.scaleImage(*image7, 2); // expand image
 		image7->saveImageToFile(filename + "_scaleUp.ppm");
+		g.scaleImage(*image8, -0.5); // shrink & flip image
+		image8->saveImageToFile(filename + "_scaleUp.ppm");
 		// rotate image CCW
 		// rotate image CW
 		// tranlate image right and down

@@ -106,22 +106,25 @@ const PPM& Graphics::scaleImage(PPM& image, double factor) {
 
 	vector<Pixel> temp; // temp vector for use in scale up/down operation
 
-	//- TODO: implement reverse logic for when factor < 0
-	if (factor < 0)
-		factor *= -1;
+	//- TODO: call flipImage if factor < 0
 
 	if (factor < 1 || factor > -1) // scale down
 	{
 		/* emplace every nth (1/factor) pixel to temp */
-		int n = ceil(1 / factor);
+		int n = abs(ceil(1 / factor));
 		for (int row = 0; row < h; row++) // loop thru rows
 			for (int col = 0; col < w; col++) // loop thru columns
-				if (row % n != 0 && col % n != 0)
+				if (row % n == 0 && col % n == 0)
 					temp.emplace_back(image[row * w + col]); // write pixel to temp
 	}
 	else if (factor > 1 || factor < -1) // scale up
 	{
 		//- TODO: implement scale up logic
+
+		int n = abs(ceil(factor));
+			for (int row = 0; row < h; row++) // loop thru rows
+				for (int col = 0; col < w; col++) // loop thru columns
+					break;
 	}
 
 	/* copy pixels from temp */
