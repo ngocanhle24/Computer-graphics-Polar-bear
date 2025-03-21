@@ -33,22 +33,30 @@ int main()
 		PPM* image7 = new PPM(*image1);
 		PPM* image8 = new PPM(*image1);
 		PPM* image9 = new PPM(*image1);
+		PPM* image10 = new PPM(*image1);
 
 		Graphics g;
 
-		g.applyFilter(*image1, "blur"); // filter image
+		g.applyFilter(*image1, "blur"); // blur image
 		image1->saveImageToFile(filename + "_blur.ppm");
-		g.applyFilter(*image2, "sharpen"); // filter image
+		g.applyFilter(*image2, "sharpen"); // sharpen image
 		image2->saveImageToFile(filename + "_sharpen.ppm");
-		g.applyFilter(*image3, "edgeDetect"); // filter image
+		g.applyFilter(*image3, "edgeDetect"); // detect edges
 		image3->saveImageToFile(filename + "_edgeDetect.ppm");
-		g.applyFilter(*image4, "emboss"); // filter image
+		g.applyFilter(*image4, "emboss"); // emboss image
 		image4->saveImageToFile(filename + "_emboss.ppm");
-		g.applyFilter(*image5, "lapacian"); // filter image
+		g.applyFilter(*image5, "lapacian"); // detect edges (alternate)
 		image5->saveImageToFile(filename + "_lapacian.ppm");
 
-		g.scaleImage(*image6, 2); // resize image by factor
-		image6->saveImageToFile(filename + "_resize.ppm");
+		g.scaleImage(*image6, 0.5); // shrink image
+		image6->saveImageToFile(filename + "_scaleDown.ppm");
+		g.scaleImage(*image7, 2); // expand image
+		image7->saveImageToFile(filename + "_scaleUp.ppm");
+		// rotate image CCW
+		// rotate image CW
+		// tranlate image right and down
+		// translate image left and up
+		// convert image to grayscale
 
 		delete image1;
 	}

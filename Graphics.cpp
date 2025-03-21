@@ -99,8 +99,37 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 // }
 
 const PPM& Graphics::scaleImage(PPM& image, double factor) {
-	image.resize(factor);
-	cout << "resize completed" << endl;
+
+	/* store width & height */
+	int w = image.getWidth();
+	int h = image.getHeight();
+
+	vector<Pixel> temp; // temp vector for use in scale up/down operation
+
+	//- TODO: implement reverse logic for when factor < 0
+	if (factor < 0)
+		factor *= -1;
+
+	if (factor < 1 || factor > -1) // scale down
+	{
+		/* emplace every nth (1/factor) pixel to temp */
+		int n = ceil(1 / factor);
+		for (int row = 0; row < h; row++) // loop thru rows
+			for (int col = 0; col < w; col++) // loop thru columns
+				if (row % n != 0 && col % n != 0)
+					temp.emplace_back(image[row * w + col]); // write pixel to temp
+	}
+	else if (factor > 1 || factor < -1) // scale up
+	{
+		//- TODO: implement scale up logic
+	}
+
+	/* copy pixels from temp */
+	image.resize(temp.size()); // resize image.pixels to fit temp
+	image.setWidth(ceil(w * factor)); // update width
+	image.setHeight(ceil(h * factor)); // update height
+	for (int i = 0; i < temp.size(); i++)
+		image[i] = temp[i]; // copy temp pixel to image.pixels
 	return image;
 }
 
