@@ -98,6 +98,29 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 //
 // }
 
+void emplacePixelNTimes(Pixel pixel, vector<Pixel>& vec, int n)
+{
+	for (int count = n; count > 0; count--) // loop n times
+		vec.emplace_back(pixel);
+
+}
+
+void emplaceRowNTimes(PPM& image, vector<Pixel>& vec, unsigned int row, int n)
+{
+	unsigned int w = image.getWidth(), numCols = w;
+	for (int count = n; count > 0; count--) // loop n times
+		for (int col = 0; col < numCols; col++) // loop thru columns
+			emplacePixelNTimes(image[col + row * w], vec, n);
+}
+
+const PPM& reversePixels(PPM& image)
+{
+	unsigned int last = image.getSize() - 1;
+	for (int i = 0; i < image.getSize(); i++)
+		swap(image[i], image[last-i]);
+	return image;
+}
+
 const PPM& Graphics::scaleImage(PPM& image, double factor) {
 
 	/* store width & height */
@@ -106,13 +129,10 @@ const PPM& Graphics::scaleImage(PPM& image, double factor) {
 
 	vector<Pixel> temp; // temp vector for use in scale up/down operation
 
-	/* reverse image if factor if negative */
-	//if (factor < 0)
-	//{
-	//	int lastIdx = image.getSize() - 1;
-	//	for (int i = 0; i < floor(image.getSize()/2); i++)
-	//		swap(image[i], image[lastIdx - i]);
-	//}
+	/* reverse image if factor is negative */
+	if (factor < 0)
+		image = reversePixels(image); // reverse pixel array
+	factor = abs(factor); // ensure that factor isn't negative
 
 	if (abs(factor) < 1) // scale down
 	{
@@ -121,11 +141,14 @@ const PPM& Graphics::scaleImage(PPM& image, double factor) {
 		for (int row = 0; row < h; row++) // loop thru rows
 			for (int col = 0; col < w; col++) // loop thru columns
 				if (row % n == 0 && col % n == 0)
-					temp.emplace_back(image[row * w + col]); // write pixel to temp
+					temp.emplace_back(image[row * w + col]); // emplace pixel if row & col are divisible by n
 	}
 	else if (abs(factor) > 1) // scale up
 	{
 		//- TODO: implement scale up logic
+		unsigned int numRows = image.getHeight();
+		for (int row = 0; row < numRows; row++) // loop thru rows
+			emplaceRowNTimes(image, temp, row, abs(factor));
 	}
 
 	/* copy pixels from temp */

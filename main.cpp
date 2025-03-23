@@ -50,10 +50,15 @@ int main()
 		image6->saveImageToFile(filename + "_scaleDown.ppm");
 		g.scaleImage(*image7, 2); // expand image
 		image7->saveImageToFile(filename + "_scaleUp.ppm");
+		g.scaleImage(*image8, -1); // reverse image
+		image8->saveImageToFile(filename + "_reverse.ppm");
+
 		// rotate image CCW
 		// rotate image CW
+		// 
 		// tranlate image right and down
 		// translate image left and up
+		// 
 		// convert image to grayscale
 
 		delete image1;

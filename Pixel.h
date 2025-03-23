@@ -9,7 +9,7 @@ private:
 
 public:
 	Pixel();
-	Pixel(const Pixel &); //? copy constructor
+	Pixel(const Pixel&); //? copy constructor
 	Pixel(unsigned int, unsigned int, unsigned int);
 	~Pixel();
 
