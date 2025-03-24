@@ -7,87 +7,48 @@ Graphics::Graphics() {};
 const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 {
 	vector<double> kernel(9);
-	int c = image.getWidth();
-	int r = image.getHeight();
-	/* c = columns = width, r = rows = height
-		[i-c-1]          [i-c]          [i-c+1]               [][][]
-		[i-1]            [i]            [i+1]                 [][][]
-		[i+c-1]          [i+c]          [i+c+1]               [][][]
-	*/
-	vector<int> offset = {
-		-c-1, -c, -c+1,
-		-1, 0, 1,
-		 c-1, c, c+1};
+	int w = image.getWidth(), h = image.getHeight();
 
-	double v;
+	vector<int> offset = { -w-1,-w,-w+1, -1,0,1, w-1,w,w+1 };
+
 	if (!strcmp(filterType, "blur"))
 	{
-		v = 1 / 9;
-		kernel = {
-			v, v, v,
-			v, v, v,
-			v, v, v};
+		double v = 1 / 9;
+		kernel = { v,v,v, v,v,v, v,v,v };
 	}
 	else if (!strcmp(filterType, "sharpen"))
 	{
-		v = 1 / 3;
-		kernel = {
-			0, -v, 0,
-			-v, 7 * v, -v,
-			0, -v, 0};
+		double v = 1 / 3;
+		kernel = { 0,-v,0, -v,7 * v,-v, 0,-v,0 };
 	}
 	else if (!strcmp(filterType, "edgeDetect"))
-	{
-		kernel = {
-			0, 1, 0,
-			1, -4, 1,
-			0, 1, 0};
-	}
+		kernel = { 0,1,0, 1,-4,1, 0,1,0 };
 	else if (!strcmp(filterType, "emboss"))
-	{
-		kernel = {
-			-2, -1, 0,
-			-1, 1, 1,
-			0, 1, 2};
-	}
+		kernel = { -2,-1,0, -1,1,1, 0,1,2 };
 	else if (!strcmp(filterType, "laplacian"))
-	{
-		kernel = {
-			0, -1, 0,
-			-1, 4, -1,
-			0, -1, 0};
-	}
+		kernel = { 0,-1,0, -1,4,-1, 0,-1,0 };
 
 	vector<const char *> rgb = {"red", "green", "blue"};
-	PPM newImage(image); // what should be returned the original image or newImage
-	// need a temporary same image to work on computation
-	// can't compute on the origin image matrix, which needs modification
+	PPM newImage(image);
 
-	for (unsigned int i = 0; i < r; i++)
-	{
-		for (unsigned int j = 0; j < c; j++)
+	for (unsigned int i = 0; i < h; i++) // loop thru rows (row-major navigation)
+		for (unsigned int j = 0; j < w; j++) // loop thru columns
 		{
-			for (int k = 0; k < 3; k++)
+			int loc = (i * w + j);
+			for (unsigned int k = 0; k < 3; k++) // loop thru RGB
 			{
-				int total = 0;
-				int loc = (i * c + j);
-				for (unsigned int m = 0; m < 9; m++)
+				unsigned int total = 0;
+				for (unsigned int m = 0; m < 9; m++) // loop thru kernel
 				{
 					unsigned int index = loc + offset[m];
-
-					// This if-statement aims to ignore out-of-bound neighbor pixels,
-					// however some surround pixels are still included in "total" because pixels are stored in 1D array
-					// The distortion is small (pixel is very small), so it doesn't affect much
-					if (index >= 0 && index < image.getSize())
-					{
+					if (index >= 0 && index < image.getSize()) // if current position + offset isn't out of bounds
 						total += kernel[m] * newImage[index][rgb[k]];
-					}
 				}
 				image[loc][rgb[k]] = total;
 			}
 		}
-	}
-	cout << filterType << " succeeds\n";
+
+	cout << filterType << " filter applied." << endl;
 	return image;
 }
 
@@ -113,12 +74,15 @@ void emplaceRowNTimes(PPM& image, vector<Pixel>& vec, unsigned int row, int n)
 			emplacePixelNTimes(image[col + row * w], vec, n);
 }
 
-const PPM& reversePixels(PPM& image)
+void reversePixels(PPM& image)
 {
 	unsigned int last = image.getSize() - 1;
 	for (int i = 0; i < image.getSize(); i++)
-		swap(image[i], image[last-i]);
-	return image;
+	{
+		Pixel temp(image[i]);
+		image[i] = image[last - i];
+		image[last - i] = temp;
+	}
 }
 
 const PPM& Graphics::scaleImage(PPM& image, double factor) {
@@ -131,32 +95,40 @@ const PPM& Graphics::scaleImage(PPM& image, double factor) {
 
 	/* reverse image if factor is negative */
 	if (factor < 0)
-		image = reversePixels(image); // reverse pixel array
-	factor = abs(factor); // ensure that factor isn't negative
+	{
+		reversePixels(image); // reverse pixel array
+		factor = abs(factor); // ensure that factor isn't negative
+	}
 
-	if (abs(factor) < 1) // scale down
+	/* scale image if factor != 1 */
+	if (factor < 1) // scale down
 	{
 		/* emplace every nth (1/factor) pixel to temp */
-		int n = abs(ceil(1 / factor));
+		int n = ceil(1 / factor);
 		for (int row = 0; row < h; row++) // loop thru rows
 			for (int col = 0; col < w; col++) // loop thru columns
 				if (row % n == 0 && col % n == 0)
 					temp.emplace_back(image[row * w + col]); // emplace pixel if row & col are divisible by n
 	}
-	else if (abs(factor) > 1) // scale up
+	else if (factor > 1) // scale up
 	{
 		//- TODO: implement scale up logic
 		unsigned int numRows = image.getHeight();
 		for (int row = 0; row < numRows; row++) // loop thru rows
-			emplaceRowNTimes(image, temp, row, abs(factor));
+			emplaceRowNTimes(image, temp, row, factor);
 	}
 
-	/* copy pixels from temp */
-	image.resize(temp.size()); // resize image.pixels to fit temp
-	image.setWidth(ceil(w * factor)); // update width
-	image.setHeight(ceil(h * factor)); // update height
-	for (int i = 0; i < temp.size(); i++)
-		image[i] = temp[i]; // copy temp pixel to image.pixels
+	/* copy pixels from temp if factor != 1 */
+	if (factor != 1)
+	{
+		image.resize(temp.size()); // resize image.pixels to fit temp
+		image.setWidth(ceil(w * factor)); // update width
+		image.setHeight(ceil(h * factor)); // update height
+		for (int i = 0; i < temp.size(); i++)
+			image[i] = temp[i]; // copy temp pixel to image.pixels
+	}
+
+	cout << "Scale image applied." << endl;
 	return image;
 }
 
