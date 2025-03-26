@@ -1,7 +1,10 @@
+#define _USE_MATH_DEFINES
 #include "Graphics.h"
-
+#include <algorithm>
+#include "graphics.h"
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 Graphics::Graphics() {};
 const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
@@ -22,18 +25,18 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 	double v;
 	if (!strcmp(filterType, "blur"))
 	{
-		v = 1 / 9;
+		v = 0.0625;
 		kernel = {
-			v, v, v,
-			v, v, v,
-			v, v, v};
+			v, 2*v, v,
+			2*v, 4*v, 2*v,
+			v, 2*v, v};
 	}
 	else if (!strcmp(filterType, "sharpen"))
 	{
-		v = 1 / 3;
+		v = double(1)/double(3);
 		kernel = {
 			0, -v, 0,
-			-v, 7 * v, -v,
+			-v, 5*v, -v,
 			0, -v, 0};
 	}
 	else if (!strcmp(filterType, "edgeDetect"))
@@ -50,12 +53,12 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 			-1, 1, 1,
 			0, 1, 2};
 	}
-	else if (!strcmp(filterType, "laplacian"))
+	else if (!strcmp(filterType, "magic"))
 	{
 		kernel = {
-			0, -1, 0,
-			-1, 4, -1,
-			0, -1, 0};
+			0, 0, 1,
+			0, 1, 0,
+			0, 0, 1};
 	}
 
 	vector<const char *> rgb = {"red", "green", "blue"};
@@ -69,7 +72,7 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 		{
 			for (int k = 0; k < 3; k++)
 			{
-				int total = 0;
+				double total = 0;
 				int loc = (i * c + j);
 				for (unsigned int m = 0; m < 9; m++)
 				{
@@ -80,10 +83,10 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 					// The distortion is small (pixel is very small), so it doesn't affect much
 					if (index >= 0 && index < image.getSize())
 					{
-						total += kernel[m] * newImage[index][rgb[k]];
+						total += kernel[m] * double(newImage[index][rgb[k]]);
 					}
 				}
-				image[loc][rgb[k]] = total;
+				image[loc][rgb[k]] = (unsigned int)total;
 			}
 		}
 	}
@@ -91,48 +94,99 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 	return image;
 }
 
-// const PPM& Graphics::makeGrayScale(PPM& image) {
-//
-// }
-// const PPM& Graphics::rotateImage(PPM& image, double angle) {
-//
-// }
-
-const PPM& Graphics::scaleImage(PPM& image, double factor) {
-
-	/* store width & height */
-	int w = image.getWidth();
-	int h = image.getHeight();
-
-	vector<Pixel> temp; // temp vector for use in scale up/down operation
-
-	//- TODO: implement reverse logic for when factor < 0
-	if (factor < 0)
-		factor *= -1;
-
-	if (factor < 1 || factor > -1) // scale down
-	{
-		/* emplace every nth (1/factor) pixel to temp */
-		int n = ceil(1 / factor);
-		for (int row = 0; row < h; row++) // loop thru rows
-			for (int col = 0; col < w; col++) // loop thru columns
-				if (row % n != 0 && col % n != 0)
-					temp.emplace_back(image[row * w + col]); // write pixel to temp
-	}
-	else if (factor > 1 || factor < -1) // scale up
-	{
-		//- TODO: implement scale up logic
+const PPM& Graphics::makeGrayscale(PPM& image) {
+	for (int i = 0; i < image.getSize(); i++) {
+		unsigned int num = (image[i]["red"] + image[i]["green"] + image[i]["blue"]) / 3.0;
+		image[i] = Pixel(num, num, num);
 	}
 
-	/* copy pixels from temp */
-	image.resize(temp.size()); // resize image.pixels to fit temp
-	image.setWidth(ceil(w * factor)); // update width
-	image.setHeight(ceil(h * factor)); // update height
-	for (int i = 0; i < temp.size(); i++)
-		image[i] = temp[i]; // copy temp pixel to image.pixels
 	return image;
 }
 
-// const PPM& Graphics::translateImage(PPM& image, int dx, int dy) {
-//
-// }
+const PPM& Graphics::rotateImage(PPM& image, double angle) {
+	int c = image.getWidth();
+	int r = image.getHeight();
+
+	PPM blackCanvas;
+	blackCanvas.setHeight(r);
+	blackCanvas.setWidth(c);
+	blackCanvas.setComment("Image rotated " + to_string(angle) + " degrees\n");
+	blackCanvas.setMagic(image.getMagic());
+	blackCanvas.setMaxColor(image.getMaxColor());
+	blackCanvas.resize(c * r);
+
+	double radians = -angle * M_PI / 180.0;
+
+	//Image center
+	double centerX = double(c) / 2.0;
+	double centerY = double(r) / 2.0;
+	
+	for (unsigned int i = 0; i < r; i++) {
+		for (unsigned int j = 0; j < c; j++) {
+			//Convert (x,y) pixel coordinate relative to center coordinate (0,0)
+			double oldX = j - centerX;
+			double oldY = centerY - i;
+
+			// Apply rotation transformation
+			/* Rotation matrix
+				[cos(alpha)		-sin(alpha)]
+				[sin(alpha)		cos(alpha)]
+			*/
+			double rotatedX = oldX * cos(radians) - oldY * sin(radians);
+			double rotatedY = oldX * sin(radians) + oldY * cos(radians);
+
+			//Convert back to coordinate on pixels
+			double newX = rotatedX + centerX;
+			double newY = centerY - rotatedY;
+
+			if (newX >= 0 && newY >= 0 && newX < c && newY < r) {
+				int oldLoc = i * c + j;
+				int newLoc = int(newY) * c + int(newX); //Round down pixel index
+
+				//then also paste it to pixels around it
+				blackCanvas[newLoc] = image[oldLoc];
+				if(newX + 1 < c) blackCanvas[newLoc+1] = image[oldLoc];
+				if (newY + 1 < r) {
+					blackCanvas[newLoc + c] = image[oldLoc];
+					if (newX + 1 < c) blackCanvas[newLoc + c + 1] = image[oldLoc];
+				}
+			}
+		}
+	}
+
+	image = blackCanvas;
+	return blackCanvas;
+}
+
+//const PPM& Graphics::scaleImage(PPM& image, double factor) {}
+
+const PPM& Graphics::translateImage(PPM& image, int dx, int dy) {
+	int c = image.getWidth();
+	int r = image.getHeight();
+
+	//Create a black canvas
+	PPM blackCanvas;
+	blackCanvas.setHeight(r);
+	blackCanvas.setWidth(c);
+	blackCanvas.setComment("Image translates " + to_string(dx) + " pixels horizontally, " + to_string(dy) + " px vertically");
+	blackCanvas.setMagic(image.getMagic());
+	blackCanvas.setMaxColor(image.getMaxColor());
+	blackCanvas.resize(c * r);
+
+	//Fill the remaining area of original image on the black canvas after translating
+	//But this tranlastion does not support for several seperate translations because some pixels will be lost due to out of viewport
+	for (unsigned int i = 0; i < r; i++) {
+		for (unsigned int j = 0; j < c; j++) {
+			unsigned int old_loc = i * c + j;
+			unsigned int x = j + dx, y = i - dy;
+
+			if (x < c && y < r && x >= 0 && y >= 0) {
+				unsigned int new_loc = y * c + x;
+				blackCanvas[new_loc] = image[old_loc];
+			}
+		}
+	}
+	image = blackCanvas;
+
+	return image;
+}

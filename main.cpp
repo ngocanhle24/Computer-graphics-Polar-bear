@@ -3,18 +3,6 @@
 
 #include "Graphics.h"
 
-// void print(const PPM &image)
-// {
-// 	for (int i = 0; i < image.getHeight(); i++)
-// 	{
-// 		for (int j = 0; j < image.getWidth(); j++)
-// 		{
-// 			cout << image[i * image.getHeight() + j]["red"] << " " << image[i * image.getHeight() + j]["green"] << " " << image[i * image.getHeight() + j]["blue"] << " ";
-// 		}
-// 		cout << endl;
-// 	}
-// }
-
 int main()
 {
 	try {
@@ -37,28 +25,39 @@ int main()
 
 		Graphics g;
 
-		g.applyFilter(*image1, "blur"); // blur image
-		image1->saveImageToFile(filename + "_blur.ppm");
-		g.applyFilter(*image2, "sharpen"); // sharpen image
-		image2->saveImageToFile(filename + "_sharpen.ppm");
-		g.applyFilter(*image3, "edgeDetect"); // detect edges
-		image3->saveImageToFile(filename + "_edgeDetect.ppm");
-		g.applyFilter(*image4, "emboss"); // emboss image
-		image4->saveImageToFile(filename + "_emboss.ppm");
-		g.applyFilter(*image5, "lapacian"); // detect edges (alternate)
-		image5->saveImageToFile(filename + "_lapacian.ppm");
+		//g.applyFilter(*image1, "blur"); // blur image
+		//image1->saveImageToFile(filename + "_blur.ppm");
+		//g.applyFilter(*image2, "sharpen"); // sharpen image
+		//image2->saveImageToFile(filename + "_sharpen.ppm");
+		//g.applyFilter(*image3, "edgeDetect"); // detect edges
+		//image3->saveImageToFile(filename + "_edgeDetect.ppm");
+		//g.applyFilter(*image4, "emboss"); // emboss image
+		//image4->saveImageToFile(filename + "_emboss.ppm");
+		//g.applyFilter(*image5, "magic"); // detect edges (alternate)
+		//image5->saveImageToFile(filename + "_magic.ppm");
 
-		g.scaleImage(*image6, 0.5); // shrink image
+		g.scaleImage(*image6, 0.75); // shrink image
 		image6->saveImageToFile(filename + "_scaleDown.ppm");
-		g.scaleImage(*image7, 2); // expand image
+		g.scaleImage(*image7, 1.75); // expand image
 		image7->saveImageToFile(filename + "_scaleUp.ppm");
-		// rotate image CCW
+		//g.rotateImage(*image8, 145);// rotate image CCW
+		//image8->saveImageToFile(filename + "_rotate.ppm");
 		// rotate image CW
-		// tranlate image right and down
-		// translate image left and up
+		//g.translateImage(*image9, 300, -100);// tranlate image right and down
+		//g.translateImage(*image9, -150, 250);// translate image left and up
+		//image9->saveImageToFile(filename + "_translate.ppm");
 		// convert image to grayscale
 
 		delete image1;
+		delete image2;
+		delete image3;
+		delete image4;
+		delete image5;
+		delete image6;
+		delete image7;
+		delete image8;
+		delete image9;
+		delete image10;
 	}
 	catch (const char* err)
 	{
