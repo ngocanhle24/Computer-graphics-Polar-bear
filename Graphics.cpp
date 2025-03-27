@@ -6,8 +6,7 @@
 #include <vector>
 #include <cmath>
 
-Graphics::Graphics() {};
-const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
+void Graphics::applyFilter(PPM &image, const char *filterType)
 {
 	vector<double> kernel(9);
 	int c = image.getWidth();
@@ -91,26 +90,24 @@ const PPM &Graphics::applyFilter(PPM &image, const char *filterType)
 		}
 	}
 	cout << filterType << " succeeds\n";
-	return image;
 }
 
-const PPM& Graphics::makeGrayscale(PPM& image) {
+void Graphics::makeGrayscale(PPM& image) {
 	for (int i = 0; i < image.getSize(); i++) {
 		unsigned int num = (image[i]["red"] + image[i]["green"] + image[i]["blue"]) / 3.0;
 		image[i] = Pixel(num, num, num);
 	}
-
-	return image;
+	cout << "grayscale done\n";
 }
 
-const PPM& Graphics::rotateImage(PPM& image, double angle) {
+void Graphics::rotateImage(PPM& image, double angle) {
 	int c = image.getWidth();
 	int r = image.getHeight();
 
 	PPM blackCanvas;
 	blackCanvas.setHeight(r);
 	blackCanvas.setWidth(c);
-	blackCanvas.setComment("Image rotated " + to_string(angle) + " degrees\n");
+	blackCanvas.setComment("Image rotated " + to_string(angle) + " degrees");
 	blackCanvas.setMagic(image.getMagic());
 	blackCanvas.setMaxColor(image.getMaxColor());
 	blackCanvas.resize(c * r);
@@ -155,12 +152,45 @@ const PPM& Graphics::rotateImage(PPM& image, double angle) {
 	}
 
 	image = blackCanvas;
-	return blackCanvas;
+	cout << "rotate done\n";
 }
 
-//const PPM& Graphics::scaleImage(PPM& image, double factor) {}
+// Scale image with positive and negative scaling factors
+void Graphics::scaleImage(PPM& image, double factor) {
+	if (factor == 0) image = PPM();
 
-const PPM& Graphics::translateImage(PPM& image, int dx, int dy) {
+	int c = image.getWidth();
+	int r = image.getHeight();
+
+	PPM scaledImg;
+	scaledImg.setHeight(round(double(r) * abs(factor)));
+	scaledImg.setWidth(round(double(c) * abs(factor)));
+	scaledImg.setComment("Image scaled by " + to_string(factor) + " time(s) in both direction");
+	scaledImg.setMagic(image.getMagic());
+	scaledImg.setMaxColor(image.getMaxColor());
+
+	int scaledHeight = scaledImg.getHeight();
+	int scaledWidth = scaledImg.getWidth();
+	scaledImg.resize(scaledHeight * scaledWidth);
+
+	for (unsigned int i = 0; i < scaledHeight; i++) {
+		for (unsigned int j = 0; j < scaledWidth; j++) {
+			//Map pixels on scaledImg to original image
+			int x = int(double(j) / abs(factor));
+			int y = int(double(i) / abs(factor));
+			if (factor < 0) x = c - 1 - x;
+
+			unsigned int originLoc = y * c + x;			
+			unsigned int scaledLoc = i * scaledWidth + j;
+			scaledImg[scaledLoc] = image[originLoc]; //NEAREST NEIGHBOR INTERPOLATION
+		}
+	}
+	image = scaledImg;
+
+	cout << "scale done\n";
+}
+
+void Graphics::translateImage(PPM& image, int dx, int dy) {
 	int c = image.getWidth();
 	int r = image.getHeight();
 
@@ -187,6 +217,5 @@ const PPM& Graphics::translateImage(PPM& image, int dx, int dy) {
 		}
 	}
 	image = blackCanvas;
-
-	return image;
+	cout << "translate done\n";
 }

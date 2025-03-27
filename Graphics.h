@@ -5,10 +5,9 @@
 class Graphics
 {
 public:
-	Graphics();
-	const PPM &applyFilter(PPM &, const char *);
-	const PPM &makeGrayscale(PPM &);
-	const PPM &rotateImage(PPM &, double);
-	const PPM &scaleImage(PPM &, double);
-	const PPM &translateImage(PPM &, int, int);
+	static void applyFilter(PPM &, const char *);
+	static void makeGrayscale(PPM &);
+	static void rotateImage(PPM &, double);
+	static void scaleImage(PPM &, double);
+	static void translateImage(PPM &, int, int);
 };
