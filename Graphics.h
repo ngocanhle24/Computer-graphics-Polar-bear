@@ -5,12 +5,10 @@
 class Graphics
 {
 public:
-	Graphics();
-
-	static void applyFilter(PPM&, const char *);
-	static void makeGrayscale(PPM&);
-	static void rotateImage(PPM&, double);
-	static void scaleImage(PPM&, double);
-	static void translateImage(PPM&, int, int);
-	static void invertColors(PPM&);
+	static const PPM& applyFilter(PPM&, const char *);
+	static const PPM& makeGrayscale(PPM&);
+	static const PPM& rotateImage(PPM&, double);
+	static const PPM& scaleImage(PPM&, double);
+	static const PPM& translateImage(PPM&, int, int);
+	static const PPM& invertColors(PPM&);
 };
