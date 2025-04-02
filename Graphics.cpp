@@ -15,7 +15,7 @@ Graphics::Graphics()
 
 }
 
-void Graphics::applyFilter(PPM &image, const char *filterType)
+const PPM& Graphics::applyFilter(PPM &image, const char *filterType)
 {
 	clock_t start = clock();
 
@@ -42,7 +42,7 @@ void Graphics::applyFilter(PPM &image, const char *filterType)
 		kernel = {0,0,1, 0,1,0, 0,0,1};
 
 	vector<const char *> rgb = {"red", "green", "blue"};
-	PPM newImage(image);
+	PPM tempImage(image);
 
 	for (unsigned int i = 0; i < r; i++)
 		for (unsigned int j = 0; j < c; j++)
@@ -55,16 +55,18 @@ void Graphics::applyFilter(PPM &image, const char *filterType)
 					unsigned int index = loc + offset[m];
 
 					if (index >= 0 && index < image.getSize())
-						total += kernel[m] * double(newImage[index][rgb[k]]);
+						total += kernel[m] * double(tempImage[index][rgb[k]]);
 				}
 				image[loc][rgb[k]] = (unsigned int)total;
 			}
 
 	clock_t end = clock();
 	std::cout << "Filter \"" << filterType << "\" completed in " << end - start << "ms." << endl;
+
+	return image;
 }
 
-void Graphics::makeGrayscale(PPM& image) {
+const PPM& Graphics::makeGrayscale(PPM& image) {
 	clock_t start = clock();
 
 	for (int i = 0; i < image.getSize(); i++) {
@@ -74,9 +76,11 @@ void Graphics::makeGrayscale(PPM& image) {
 
 	clock_t end = clock();
 	std::cout << "Grayscale completed in " << end - start << "ms." << endl;
+
+	return image;
 }
 
-void Graphics::rotateImage(PPM& image, double angle) {
+const PPM& Graphics::rotateImage(PPM& image, double angle) {
 	clock_t start = clock();
 
 	int c = image.getWidth();
@@ -132,10 +136,12 @@ void Graphics::rotateImage(PPM& image, double angle) {
 
 	clock_t end = clock();
 	std::cout << "Rotation completed in " << end - start << "ms." << endl;
+
+	return image;
 }
 
 // Scale image with positive and negative scaling factors
-void Graphics::scaleImage(PPM& image, double factor) {
+const PPM& Graphics::scaleImage(PPM& image, double factor) {
 	clock_t start = clock();
 
 	if (factor == 0)
@@ -171,9 +177,11 @@ void Graphics::scaleImage(PPM& image, double factor) {
 
 	clock_t end = clock();
 	std::cout << "Scaling completed in " << end - start << "ms." << endl;
+
+	return image;
 }
 
-void Graphics::translateImage(PPM& image, int dx, int dy) {
+const PPM& Graphics::translateImage(PPM& image, int dx, int dy) {
 	clock_t start = clock();
 
 	int c = image.getWidth();
@@ -205,9 +213,11 @@ void Graphics::translateImage(PPM& image, int dx, int dy) {
 
 	clock_t end = clock();
 	std::cout << "Translation completed in " << end - start << "ms." << endl;
+
+	return image;
 }
 
-void Graphics::invertColors(PPM& image)
+const PPM& Graphics::invertColors(PPM& image)
 {
 	clock_t start = clock();
 	unsigned int maxColor = image.getMaxColor();
@@ -221,4 +231,6 @@ void Graphics::invertColors(PPM& image)
 
 	clock_t end =clock();
 	std::cout << "Inversion completed in " << end - start << "ms." << endl;
+
+	return image;
 }
