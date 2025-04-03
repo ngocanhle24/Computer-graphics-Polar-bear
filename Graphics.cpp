@@ -10,11 +10,6 @@
 
 using namespace std;
 
-Graphics::Graphics()
-{
-
-}
-
 const PPM& Graphics::applyFilter(PPM &image, const char *filterType)
 {
 	clock_t start = clock();
