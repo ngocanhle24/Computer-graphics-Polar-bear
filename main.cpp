@@ -1,39 +1,70 @@
 #include <iostream>
 #include <fstream>
-
 #include "Graphics.h"
-
-// void print(const PPM &image)
-// {
-// 	for (int i = 0; i < image.getHeight(); i++)
-// 	{
-// 		for (int j = 0; j < image.getWidth(); j++)
-// 		{
-// 			cout << image[i * image.getHeight() + j]["red"] << " " << image[i * image.getHeight() + j]["green"] << " " << image[i * image.getHeight() + j]["blue"] << " ";
-// 		}
-// 		cout << endl;
-// 	}
-// }
 
 int main()
 {
-	ifstream infile("Shahriar.ppm");
-	PPM *image1 = new PPM(infile);
-	// PPM* image2 = new PPM(*image1);
-	// PPM* image3 = new PPM(*image1);
-	// PPM* image4 = new PPM(*image1);
+	try {
+		Graphics g; // instantiate context
 
-	// print(bearImage);
-	Graphics g;
-	// g.applyFilter(*image1, "edgeDetect");
-	g.applyFilter(*image1, "laplacian");
-	/*g.applyFilter(*image1, "blur");
-	g.applyFilter(*image1, "blur");
-	g.applyFilter(*image1, "blur");
-	g.applyFilter(*image1, "blur");*/
-	image1->saveImageToFile("filtered_polar_bear.ppm");
+		string filename = "Shahriar";
 
-	delete image1;
+		ifstream infile(filename + ".ppm");
+		if (!infile.is_open())
+			throw "Error! File could not be opened.";
+
+		/* create images */
+		PPM* image = new PPM(infile); // original image
+		PPM* temp = new PPM(*image); // copy image to temp
+
+		/* test filters */
+		*temp = g.applyFilter(*image, "blur"); // blur image
+		temp->saveImageToFile(filename + "_blur.ppm");
+		*temp = g.applyFilter(*image, "sharpen"); // sharpen image
+		temp->saveImageToFile(filename + "_sharpen.ppm");
+		*temp = g.applyFilter(*image, "edgeDetect"); // detect edges
+		temp->saveImageToFile(filename + "_edgeDetect.ppm");
+		*temp = g.applyFilter(*image, "emboss"); // emboss image
+		temp->saveImageToFile(filename + "_emboss.ppm");
+		*temp = g.applyFilter(*image, "magic"); // randomly-created filter (alternate)
+		temp->saveImageToFile(filename + "_magic.ppm");
+
+		/* test scaling */
+		*temp = g.scaleImage(*image, 0.5); // shrink image
+		temp->saveImageToFile(filename + "_scaleDown.ppm");
+		*temp = g.scaleImage(*image, 1.75); // expand image
+		temp->saveImageToFile(filename + "_scaleUp.ppm");
+		*temp = g.scaleImage(*image, -1.0); // reverse image
+		temp->saveImageToFile(filename + "_reverse.ppm");
+
+		/* test rotation */
+		*temp = g.rotateImage(*image, -45.0); // rotate image CCW
+		temp->saveImageToFile(filename + "_CCW_rotation.ppm");
+		*temp = g.rotateImage(*image, 45.0); // rotate image CW
+		temp->saveImageToFile(filename + "_CW_roatation.ppm");
+
+		/* test translation */
+		*temp = g.translateImage(*image, 300, -100); // tranlate image right and down
+		temp->saveImageToFile(filename + "_translateRD.ppm");
+		*temp = g.translateImage(*image, -150, 250); // translate image left and up
+		temp->saveImageToFile(filename + "_translateLU.ppm");
+
+		/* test grayscale */
+		*temp = g.makeGrayscale(*image); //convert image to grayscale
+		temp->saveImageToFile(filename + "_grayScale.ppm");
+
+		/* test color inversion */
+		*temp = g.invertColors(*image); //convert image to grayscale
+		temp->saveImageToFile(filename + "_invertColors.ppm");
+
+		/* delete images */
+		delete image;
+		delete temp;
+
+	}
+	catch (const char* err) {
+		cout << err << endl;
+	}
 
 	return 0;
 }

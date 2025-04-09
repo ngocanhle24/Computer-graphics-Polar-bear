@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -189,7 +190,7 @@ void PPM::saveImageToFile(string file) const
 	}
 }
 
-void PPM::resize(unsigned int n)
+void PPM::resize(unsigned int size)
 {
-	pixels.resize(n); // No idea what he means by "Resize"
+	pixels.resize(size);
 }
