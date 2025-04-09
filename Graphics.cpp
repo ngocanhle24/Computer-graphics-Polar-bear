@@ -30,7 +30,7 @@ const PPM& Graphics::applyFilter(PPM &image, const char *filterType)
 		kernel = {0,-v,0, -v,5*v,-v, 0,-v,0};
 	}
 	else if (!strcmp(filterType, "edgeDetect"))
-		kernel = {0,1,0, 1,-4,1, 0,1,0};
+		kernel = {1,0,-1, 0,0,0, 1,0,-1};
 	else if (!strcmp(filterType, "emboss"))
 		kernel = {-2,-1,0, -1,1,1, 0,1,2};
 	else if (!strcmp(filterType, "magic"))
@@ -49,8 +49,9 @@ const PPM& Graphics::applyFilter(PPM &image, const char *filterType)
 				{
 					unsigned int index = loc + offset[m];
 
-					if (index >= 0 && index < image.getSize())
+					if (index >= 0 && index < image.getSize()) //1-pixel border around the edge of the image won't be filtered properly due to 1D array pixel, but too small to see
 						total += kernel[m] * double(tempImage[index][rgb[k]]);
+
 				}
 				image[loc][rgb[k]] = (unsigned int)total;
 			}
@@ -97,33 +98,36 @@ const PPM& Graphics::rotateImage(PPM& image, double angle) {
 	
 	for (unsigned int i = 0; i < r; i++) {
 		for (unsigned int j = 0; j < c; j++) {
-			//Convert (x,y) pixel coordinate relative to center coordinate (0,0)
-			double oldX = j - centerX;
-			double oldY = centerY - i;
+			//Convert (i,j) pixel relative to center (0,0)
+			double X = j - centerX;
+			double Y = centerY - i;
 
 			// Apply rotation transformation
 			/* Rotation matrix
 				[cos(alpha)		-sin(alpha)]
 				[sin(alpha)		cos(alpha)]
 			*/
-			double rotatedX = oldX * cos(radians) - oldY * sin(radians);
-			double rotatedY = oldX * sin(radians) + oldY * cos(radians);
+			double rotatedX = X * cos(radians) - Y * sin(radians);
+			double rotatedY = X * sin(radians) + Y * cos(radians);
 
 			//Convert back to coordinate on pixels
-			double newX = rotatedX + centerX;
-			double newY = centerY - rotatedY;
+			double new_j = rotatedX + centerX;
+			double new_i = centerY - rotatedY;
 
-			if (newX >= 0 && newY >= 0 && newX < c && newY < r) {
+			if (new_i >= 0 && new_j >= 0 && new_i < r && new_j < c) {
 				int oldLoc = i * c + j;
-				int newLoc = int(newY) * c + int(newX); //Round down pixel index
+				int newLoc = int(new_i) * c + int(new_j); //Round down pixel index
 
-				//then also paste it to pixels around it
 				blackCanvas[newLoc] = image[oldLoc];
-				if(newX + 1 < c) blackCanvas[newLoc+1] = image[oldLoc];
-				if (newY + 1 < r) {
+				//also paste it to pixels around it to avoid black holes
+				//[current  ][newLoc+1  ]
+				//[newLoc + c][newLoc+c+1]
+
+				if(new_j + 1 < c) blackCanvas[newLoc+1] = image[oldLoc];
+				if (new_i + 1 < r) {
 					blackCanvas[newLoc + c] = image[oldLoc];
-					if (newX + 1 < c) blackCanvas[newLoc + c + 1] = image[oldLoc];
-				}
+					if (new_j + 1 < c) blackCanvas[newLoc + c + 1] = image[oldLoc];
+				} //NEAREST NEIGHBOR INTERPOLATION
 			}
 		}
 	}
