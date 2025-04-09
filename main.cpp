@@ -31,47 +31,47 @@ int main()
 		PPM* image14 = new PPM(*image0);
 
 		///* test filters */
-		//Graphics::applyFilter(*image1, "blur"); // blur image
-		//Graphics::applyFilter(*image1, "blur"); // blur image
-		//Graphics::applyFilter(*image1, "blur"); // blur image
-		//Graphics::applyFilter(*image1, "blur"); // blur image
-		//image1->saveImageToFile(filename + "_blur.ppm");
-		//Graphics::applyFilter(*image2, "sharpen"); // sharpen image
-		//image2->saveImageToFile(filename + "_sharpen.ppm");
+		Graphics::applyFilter(*image1, "blur"); // blur image
+		Graphics::applyFilter(*image1, "blur"); // blur image
+		Graphics::applyFilter(*image1, "blur"); // blur image
+		Graphics::applyFilter(*image1, "blur"); // blur image
+		image1->saveImageToFile(filename + "_blur.ppm");
+		Graphics::applyFilter(*image2, "sharpen"); // sharpen image
+		image2->saveImageToFile(filename + "_sharpen.ppm");
 		Graphics::applyFilter(*image3, "edgeDetect"); // detect edges
 		image3->saveImageToFile(filename + "_edgeDetect.ppm");
-		//Graphics::applyFilter(*image4, "emboss"); // emboss image
-		//image4->saveImageToFile(filename + "_emboss.ppm");
-		//Graphics::applyFilter(*image5, "magic"); // randomly-created filter (alternate)
-		//image5->saveImageToFile(filename + "_magic.ppm");
+		Graphics::applyFilter(*image4, "emboss"); // emboss image
+		image4->saveImageToFile(filename + "_emboss.ppm");
+		Graphics::applyFilter(*image5, "magic"); // randomly-created filter (alternate)
+		image5->saveImageToFile(filename + "_magic.ppm");
 
-		/////* test scaling */
-		//Graphics::scaleImage(*image6, 0.5); // shrink image
-		//image6->saveImageToFile(filename + "_scaleDown.ppm");
-		//Graphics::scaleImage(*image7, 1.75); // expand image
-		//image7->saveImageToFile(filename + "_scaleUp.ppm");
-		//Graphics::scaleImage(*image8, -1.5); // reverse image
-		//image8->saveImageToFile(filename + "_reverse.ppm");
+		/* test scaling */
+		Graphics::scaleImage(*image6, 0.5); // shrink image
+		image6->saveImageToFile(filename + "_scaleDown.ppm");
+		Graphics::scaleImage(*image7, 1.75); // expand image
+		image7->saveImageToFile(filename + "_scaleUp.ppm");
+		Graphics::scaleImage(*image8, -1.5); // reverse image
+		image8->saveImageToFile(filename + "_reverse.ppm");
 
-		/////* test rotation */
-		//Graphics::rotateImage(*image9, -47.6); // rotate image CCW
-		//image9->saveImageToFile(filename + "_CCW_rotation.ppm");
-		//Graphics::rotateImage(*image10, 156.6); // rotate image CW
-		//image10->saveImageToFile(filename + "_CW_roatation.ppm");
+		/* test rotation */
+		Graphics::rotateImage(*image9, -47.6); // rotate image CCW
+		image9->saveImageToFile(filename + "_CCW_rotation.ppm");
+		Graphics::rotateImage(*image10, 156.6); // rotate image CW
+		image10->saveImageToFile(filename + "_CW_roatation.ppm");
 
-		/////* test translation */
-		//Graphics::translateImage(*image11, 300, -100);// tranlate image right and down
-		//image11->saveImageToFile(filename + "_translateRD.ppm");
-		//Graphics::translateImage(*image12, -150, 250);// translate image left and up
-		//image12->saveImageToFile(filename + "_translateLU.ppm");
+		/* test translation */
+		Graphics::translateImage(*image11, 300, -100);// tranlate image right and down
+		image11->saveImageToFile(filename + "_translateRD.ppm");
+		Graphics::translateImage(*image12, -150, 250);// translate image left and up
+		image12->saveImageToFile(filename + "_translateLU.ppm");
 
-		/////* test grayscale */
-		//Graphics::makeGrayscale(*image13);//convert image to grayscale
-		//image13->saveImageToFile(filename + "_grayScale.ppm");
+		/* test grayscale */
+		Graphics::makeGrayscale(*image13);//convert image to grayscale
+		image13->saveImageToFile(filename + "_grayScale.ppm");
 
-		/////* test invertColor */
-		//Graphics::invertColors(*image14);//convert image to grayscale
-		//image14->saveImageToFile(filename + "_invertColors.ppm");
+		/* test invertColor */
+		Graphics::invertColors(*image14);//convert image to grayscale
+		image14->saveImageToFile(filename + "_invertColors.ppm");
 
 		/* delete images */
 		delete image0;
